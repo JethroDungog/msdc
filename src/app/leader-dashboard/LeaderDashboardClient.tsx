@@ -202,11 +202,11 @@ export default function LeaderDashboardClient({
             <p className="text-xs text-gray-500 mt-1">Total Members</p>
           </div>
           <div className="section-card text-center py-4">
-            <p className="text-3xl font-bold text-red-400">{announcements.length}</p>
+            <p className="text-3xl font-bold text-red-600 dark:text-red-400">{announcements.length}</p>
             <p className="text-xs text-gray-500 mt-1">Announcements</p>
           </div>
           <div className="section-card text-center py-4 col-span-2 sm:col-span-1">
-            <p className="text-3xl font-bold text-green-400">
+            <p className="text-3xl font-bold text-green-600 dark:text-green-400">
               {new Date().toLocaleDateString('en-PH', { weekday: 'short' })}
             </p>
             <p className="text-xs text-gray-500 mt-1">Today</p>
