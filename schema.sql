@@ -82,10 +82,11 @@ CREATE TABLE IF NOT EXISTS public.attendance_records (
   member_id     UUID NOT NULL REFERENCES public.members(id) ON DELETE CASCADE,
   leader_id     UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   session_date  DATE NOT NULL DEFAULT CURRENT_DATE,
+  service_type  TEXT NOT NULL DEFAULT 'Sunday Service',
   present       BOOLEAN NOT NULL DEFAULT FALSE,
   notes         TEXT,
   created_at    TIMESTAMPTZ DEFAULT NOW() NOT NULL,
-  UNIQUE(member_id, session_date)
+  UNIQUE(member_id, session_date, service_type)
 );
 
 -- ============================================================

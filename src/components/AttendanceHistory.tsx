@@ -10,6 +10,7 @@ interface AttendanceHistoryProps {
 
 interface SessionSummary {
   session_date: string
+  service_type: string
   total: number
   present: number
 }
@@ -25,6 +26,7 @@ export default function AttendanceHistory({ leaderId }: AttendanceHistoryProps) 
 
   const [sessions, setSessions] = useState<SessionSummary[]>([])
   const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  const [selectedService, setSelectedService] = useState<string | null>(null)
   const [sessionDetails, setSessionDetails] = useState<MemberRecord[]>([])
   const [loading, setLoading] = useState(true)
   const [loadingDetails, setLoadingDetails] = useState(false)
@@ -37,31 +39,44 @@ export default function AttendanceHistory({ leaderId }: AttendanceHistoryProps) 
     setLoading(true)
     const { data } = await supabase
       .from('attendance_records')
-      .select('session_date, present')
+      .select('session_date, service_type, present')
       .eq('leader_id', leaderId)
       .order('session_date', { ascending: false })
 
     if (data) {
-      // Group by date
-      const grouped: Record<string, { total: number; present: number }> = {}
+      // Group by date + service_type
+      const grouped: Record<string, { total: number; present: number; date: string; service: string }> = {}
       data.forEach((rec) => {
-        if (!grouped[rec.session_date]) {
-          grouped[rec.session_date] = { total: 0, present: 0 }
+        const type = rec.service_type || 'Sunday Service' // default fallback
+        const key = `${rec.session_date}_${type}`
+        if (!grouped[key]) {
+          grouped[key] = { total: 0, present: 0, date: rec.session_date, service: type }
         }
-        grouped[rec.session_date].total++
-        if (rec.present) grouped[rec.session_date].present++
+        grouped[key].total++
+        if (rec.present) grouped[key].present++
       })
-      const result = Object.entries(grouped).map(([date, stats]) => ({
-        session_date: date,
-        ...stats,
+      const result = Object.values(grouped).map((stats) => ({
+        session_date: stats.date,
+        service_type: stats.service,
+        total: stats.total,
+        present: stats.present,
       }))
+      // Sort by date desc, then service name
+      result.sort((a, b) => {
+        if (a.session_date === b.session_date) {
+          return a.service_type.localeCompare(b.service_type)
+        }
+        return new Date(b.session_date).getTime() - new Date(a.session_date).getTime()
+      })
+      
       setSessions(result)
     }
     setLoading(false)
   }
 
-  async function loadSessionDetails(date: string) {
+  async function loadSessionDetails(date: string, service: string) {
     setSelectedDate(date)
+    setSelectedService(service)
     setLoadingDetails(true)
 
     const { data } = await supabase
@@ -69,6 +84,7 @@ export default function AttendanceHistory({ leaderId }: AttendanceHistoryProps) 
       .select('member_id, present, members(full_name)')
       .eq('leader_id', leaderId)
       .eq('session_date', date)
+      .eq('service_type', service)
 
     setSessionDetails((data as unknown as MemberRecord[]) ?? [])
     setLoadingDetails(false)
@@ -105,16 +121,16 @@ export default function AttendanceHistory({ leaderId }: AttendanceHistoryProps) 
       <div className="grid grid-cols-1 gap-2">
         {sessions.map((session, i) => {
           const pct = session.total > 0 ? Math.round((session.present / session.total) * 100) : 0
-          const isSelected = selectedDate === session.session_date
+          const isSelected = selectedDate === session.session_date && selectedService === session.service_type
 
           return (
-            <div key={session.session_date} className="animate-fade-in" style={{ animationDelay: `${i * 40}ms` }}>
+            <div key={`${session.session_date}_${session.service_type}`} className="animate-fade-in" style={{ animationDelay: `${i * 40}ms` }}>
               <button
-                id={`history-session-${session.session_date}`}
+                id={`history-session-${session.session_date}-${session.service_type.replace(/\\s+/g, '')}`}
                 onClick={() =>
                   isSelected
                     ? setSelectedDate(null)
-                    : loadSessionDetails(session.session_date)
+                    : loadSessionDetails(session.session_date, session.service_type)
                 }
                 className={`w-full section-card flex items-center gap-4 text-left transition-all hover:border-white/15 ${
                   isSelected ? 'border-red-600/40 bg-red-900/10' : ''
@@ -138,12 +154,13 @@ export default function AttendanceHistory({ leaderId }: AttendanceHistoryProps) 
 
                 {/* Stats */}
                 <div className="flex-1 min-w-0">
+                  <p className="text-white font-medium text-sm mb-1">{session.service_type}</p>
                   <div className="flex items-center justify-between mb-1.5">
-                    <p className="text-sm text-gray-300">
+                    <p className="text-xs text-gray-300">
                       <span className="text-white font-semibold">{session.present}</span>
                       <span className="text-gray-500"> / {session.total} present</span>
                     </p>
-                    <span className={`text-sm font-bold ${pct >= 80 ? 'text-green-400' : pct >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
+                    <span className={`text-xs font-bold ${pct >= 80 ? 'text-green-400' : pct >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
                       {pct}%
                     </span>
                   </div>
@@ -171,7 +188,7 @@ export default function AttendanceHistory({ leaderId }: AttendanceHistoryProps) 
               {isSelected && (
                 <div className="mt-1 section-card border-red-600/20 animate-fade-in">
                   <p className="text-xs font-semibold text-red-400 mb-3 uppercase tracking-wide">
-                    {format(parseISO(session.session_date), 'MMMM d, yyyy')} — Attendance Detail
+                    {format(parseISO(session.session_date), 'MMMM d, yyyy')} • {session.service_type}
                   </p>
                   {loadingDetails ? (
                     <div className="flex justify-center py-4">

@@ -28,24 +28,26 @@ export default function AttendanceTracker({ leaderId, members }: AttendanceTrack
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [sessionDate, setSessionDate] = useState(today)
+  const [serviceType, setServiceType] = useState('Sunday Service')
 
   // Re-initialize when members change
   useEffect(() => {
     setAttendance(Object.fromEntries(members.map((m) => [m.id, attendance[m.id] ?? false])))
   }, [members])
 
-  // Load existing attendance for the selected date
+  // Load existing attendance for the selected date and service type
   useEffect(() => {
     if (members.length === 0) return
-    loadAttendanceForDate(sessionDate)
-  }, [sessionDate, members])
+    loadAttendanceForDate(sessionDate, serviceType)
+  }, [sessionDate, serviceType, members])
 
-  async function loadAttendanceForDate(date: string) {
+  async function loadAttendanceForDate(date: string, type: string) {
     const { data } = await supabase
       .from('attendance_records')
       .select('member_id, present')
       .eq('leader_id', leaderId)
       .eq('session_date', date)
+      .eq('service_type', type)
 
     if (data && data.length > 0) {
       const loaded: AttendanceMap = Object.fromEntries(members.map((m) => [m.id, false]))
@@ -78,12 +80,13 @@ export default function AttendanceTracker({ leaderId, members }: AttendanceTrack
       member_id: m.id,
       leader_id: leaderId,
       session_date: sessionDate,
+      service_type: serviceType,
       present: attendance[m.id] ?? false,
     }))
 
     const { error: upsertError } = await supabase
       .from('attendance_records')
-      .upsert(records, { onConflict: 'member_id,session_date' })
+      .upsert(records, { onConflict: 'member_id,session_date,service_type' })
 
     setSaving(false)
 
@@ -108,8 +111,24 @@ export default function AttendanceTracker({ leaderId, members }: AttendanceTrack
           <h3 className="font-semibold text-white">Attendance Tracker</h3>
           <p className="text-xs text-gray-500 mt-0.5">{todayDisplay}</p>
         </div>
-        {/* Date picker */}
-        <div className="flex items-center gap-2">
+        
+        {/* Controls */}
+        <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3">
+          {/* Service Type picker */}
+          <div className="flex items-center gap-2">
+            <select
+              value={serviceType}
+              onChange={(e) => { setServiceType(e.target.value); setSaved(false) }}
+              className="input-field py-1.5 px-3 text-sm min-w-[150px]"
+            >
+              <option value="Sunday Service" className="bg-gray-900 text-white">Sunday Service</option>
+              <option value="Midweek Service" className="bg-gray-900 text-white">Midweek Service</option>
+              <option value="Dawnprayer Service" className="bg-gray-900 text-white">Dawnprayer Service</option>
+            </select>
+          </div>
+          
+          {/* Date picker */}
+          <div className="flex items-center gap-2">
           <label className="text-xs text-gray-400">Session Date:</label>
           <input
             id="attendance-date"
@@ -121,6 +140,7 @@ export default function AttendanceTracker({ leaderId, members }: AttendanceTrack
           />
         </div>
       </div>
+    </div>
 
       {/* Stats bar */}
       {totalCount > 0 && (
