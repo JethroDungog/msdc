@@ -12,7 +12,7 @@ export default function EventCard({ event, isAdmin, onDelete }: EventCardProps) 
   const isPast = eventDate < new Date(new Date().setHours(0,0,0,0))
 
   return (
-    <div className={`section-card relative group transition-all hover:border-white/20 ${isPast ? 'opacity-60' : ''}`}>
+    <div className={`section-card relative group transition-all hover:border-black/15 dark:hover:border-white/20 ${isPast ? 'opacity-60' : ''}`}>
       {isAdmin && onDelete && (
         <button
           onClick={() => onDelete(event.id)}
@@ -28,18 +28,18 @@ export default function EventCard({ event, isAdmin, onDelete }: EventCardProps) 
 
       <div className="flex items-start gap-4">
         {/* Date Box */}
-        <div className="flex flex-col items-center justify-center bg-white/5 rounded-xl min-w-[60px] p-2 border border-white/10 shrink-0">
-          <span className="text-red-400 text-xs font-bold uppercase tracking-wider">
+        <div className="flex flex-col items-center justify-center bg-black/5 dark:bg-white/5 rounded-xl min-w-[60px] p-2 border border-black/10 dark:border-white/10 shrink-0">
+          <span className="text-red-600 dark:text-red-400 text-xs font-bold uppercase tracking-wider">
             {format(eventDate, 'MMM')}
           </span>
-          <span className="text-white text-2xl font-black">
+          <span className="text-gray-900 dark:text-white text-2xl font-black">
             {format(eventDate, 'dd')}
           </span>
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0 py-1 pr-6">
-          <h4 className="text-white font-semibold text-base leading-tight truncate">
+          <h4 className="text-gray-900 dark:text-white font-semibold text-base leading-tight truncate">
             {event.title}
           </h4>
           
@@ -53,13 +53,13 @@ export default function EventCard({ event, isAdmin, onDelete }: EventCardProps) 
           </div>
 
           {event.description && (
-            <p className="text-sm text-gray-400 mt-2 line-clamp-2">
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-2">
               {event.description}
             </p>
           )}
           
           {isAdmin && event.profiles && (
-            <p className="text-xs text-gray-600 mt-3 border-t border-white/5 pt-2">
+            <p className="text-xs text-gray-500 dark:text-gray-600 mt-3 border-t border-black/5 dark:border-white/5 pt-2">
               Created by {event.profiles.full_name}
             </p>
           )}

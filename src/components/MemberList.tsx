@@ -79,7 +79,7 @@ export default function MemberList({ leaderId, members, onMembersChanged }: Memb
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="font-semibold text-white">My Members</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-white">My Members</h3>
           <p className="text-xs text-gray-500 mt-0.5">{members.length} member{members.length !== 1 ? 's' : ''} assigned</p>
         </div>
         <button
@@ -97,11 +97,11 @@ export default function MemberList({ leaderId, members, onMembersChanged }: Memb
       {/* Add Member Form */}
       {showAddForm && (
         <form onSubmit={handleAdd} id="add-member-form"
-          className="section-card border-red-600/20 space-y-3 animate-fade-in">
-          <h4 className="text-sm font-semibold text-red-400">New Member</h4>
+          className="section-card border-red-300 dark:border-red-600/20 space-y-3 animate-fade-in">
+          <h4 className="text-sm font-semibold text-red-600 dark:text-red-400">New Member</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs text-gray-400 mb-1">Full Name *</label>
+              <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Full Name *</label>
               <input
                 id="member-name"
                 type="text"
@@ -113,7 +113,7 @@ export default function MemberList({ leaderId, members, onMembersChanged }: Memb
               />
             </div>
             <div>
-              <label className="block text-xs text-gray-400 mb-1">Phone</label>
+              <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Phone</label>
               <input
                 id="member-phone"
                 type="tel"
@@ -139,11 +139,11 @@ export default function MemberList({ leaderId, members, onMembersChanged }: Memb
       {/* Edit Form */}
       {editingMember && (
         <form onSubmit={handleEdit} id="edit-member-form"
-          className="section-card border-yellow-600/20 space-y-3 animate-fade-in">
-          <h4 className="text-sm font-semibold text-yellow-400">Edit Member</h4>
+          className="section-card border-yellow-300 dark:border-yellow-600/20 space-y-3 animate-fade-in">
+          <h4 className="text-sm font-semibold text-yellow-600 dark:text-yellow-400">Edit Member</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs text-gray-400 mb-1">Full Name *</label>
+              <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Full Name *</label>
               <input
                 type="text"
                 value={editingMember.full_name}
@@ -153,7 +153,7 @@ export default function MemberList({ leaderId, members, onMembersChanged }: Memb
               />
             </div>
             <div>
-              <label className="block text-xs text-gray-400 mb-1">Phone</label>
+              <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Phone</label>
               <input
                 type="tel"
                 value={editingMember.phone ?? ''}
@@ -162,7 +162,7 @@ export default function MemberList({ leaderId, members, onMembersChanged }: Memb
               />
             </div>
           </div>
-          {error && <p className="text-xs text-red-400">{error}</p>}
+          {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
           <div className="flex gap-2">
             <button type="submit" disabled={adding} className="btn-red text-sm">
               {adding ? 'Updating...' : 'Update Member'}
@@ -177,14 +177,14 @@ export default function MemberList({ leaderId, members, onMembersChanged }: Memb
       {/* Members List */}
       {members.length === 0 ? (
         <div className="section-card flex flex-col items-center justify-center py-12 text-center">
-          <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-3">
-            <svg className="w-8 h-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="w-16 h-16 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center mb-3">
+            <svg className="w-8 h-8 text-gray-400 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                 d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </div>
-          <p className="text-gray-400 font-medium">No members yet</p>
-          <p className="text-xs text-gray-600 mt-1">Click "Add Member" to get started</p>
+          <p className="text-gray-600 dark:text-gray-400 font-medium">No members yet</p>
+          <p className="text-xs text-gray-500 dark:text-gray-600 mt-1">Click "Add Member" to get started</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -201,7 +201,7 @@ export default function MemberList({ leaderId, members, onMembersChanged }: Memb
 
               {/* Info */}
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-white text-sm truncate">{member.full_name}</p>
+                <p className="font-medium text-gray-900 dark:text-white text-sm truncate">{member.full_name}</p>
                 <div className="flex items-center gap-3 mt-0.5">
                   {member.phone && (
                     <span className="text-xs text-gray-500 truncate">{member.phone}</span>

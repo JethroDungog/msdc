@@ -29,7 +29,7 @@ export default function AnnouncementCard({
       <div className="flex-1 min-w-0">
         {/* Header */}
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-semibold text-white text-base leading-snug">{announcement.title}</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-white text-base leading-snug">{announcement.title}</h3>
           {isAdmin && onDelete && (
             <button
               id={`delete-announcement-${announcement.id}`}
@@ -47,7 +47,7 @@ export default function AnnouncementCard({
         </div>
 
         {/* Body */}
-        <p className="mt-1.5 text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
+        <p className="mt-1.5 text-gray-600 dark:text-gray-300 text-sm leading-relaxed whitespace-pre-wrap">
           {announcement.body}
         </p>
 

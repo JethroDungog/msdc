@@ -129,7 +129,7 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
   const totalMembers = leaders.reduce((sum, l) => sum + l.memberCount, 0)
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--msdc-charcoal)' }}>
+    <div className="min-h-screen bg-msdc-charcoal-light dark:bg-msdc-charcoal">
       <Navbar userFullName={profile.full_name} userRole="admin" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
@@ -171,7 +171,7 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
         </div>
 
         {/* ── Tab Navigation ────────────────────────────── */}
-        <div className="flex gap-1 bg-white/[0.04] border border-white/[0.07] rounded-xl p-1">
+        <div className="flex gap-1 bg-black/[0.04] dark:bg-white/[0.04] border border-black/[0.07] dark:border-white/[0.07] rounded-xl p-1">
           {([
             {
               key: 'announcements', label: 'Announcements', count: announcements.length,
@@ -192,14 +192,14 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
               onClick={() => setActiveTab(tab.key)}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex-1 justify-center ${
                 activeTab === tab.key
-                  ? 'bg-gradient-to-r from-red-700 to-red-900 text-white shadow-lg shadow-red-900/30'
-                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  ? 'bg-gradient-to-r from-red-500 to-red-700 dark:from-red-700 dark:to-red-900 text-white shadow-lg shadow-red-900/30'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
               }`}
             >
               {tab.icon}
               {tab.label}
               <span className={`text-xs rounded-full px-1.5 py-0.5 ${
-                activeTab === tab.key ? 'bg-white/20 text-white' : 'bg-white/10 text-gray-500'
+                activeTab === tab.key ? 'bg-white/20 text-white' : 'bg-black/10 dark:bg-white/10 text-gray-500'
               }`}>
                 {tab.count}
               </span>
@@ -215,7 +215,7 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
               <div className="section-card sticky top-20">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="w-1 h-5 rounded-full bg-gradient-to-b from-red-500 to-red-800" />
-                  <h2 className="font-semibold text-white">Post Announcement</h2>
+                  <h2 className="font-semibold text-gray-900 dark:text-white">Post Announcement</h2>
                 </div>
                 <AnnouncementForm userId={profile.id} onCreated={refreshAnnouncements} />
               </div>
@@ -224,20 +224,20 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
             {/* Announcement List */}
             <div className="lg:col-span-2 space-y-3">
               <div className="flex items-center gap-2">
-                <h2 className="font-semibold text-white">All Announcements</h2>
+                <h2 className="font-semibold text-gray-900 dark:text-white">All Announcements</h2>
                 <span className="text-xs text-gray-500">{announcements.length} total</span>
               </div>
 
               {announcements.length === 0 ? (
                 <div className="section-card py-16 flex flex-col items-center justify-center text-center">
-                  <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-3">
-                    <svg className="w-8 h-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="w-16 h-16 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center mb-3">
+                    <svg className="w-8 h-8 text-gray-400 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                         d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
                     </svg>
                   </div>
-                  <p className="text-gray-400 font-medium">No announcements yet</p>
-                  <p className="text-xs text-gray-600 mt-1">Create your first post using the form</p>
+                  <p className="text-gray-600 dark:text-gray-400 font-medium">No announcements yet</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-600 mt-1">Create your first post using the form</p>
                 </div>
               ) : (
                 announcements.map((ann, i) => (
@@ -267,20 +267,20 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
             {/* Events List */}
             <div className="lg:col-span-2 space-y-3">
               <div className="flex items-center gap-2">
-                <h2 className="font-semibold text-white">Upcoming Events</h2>
+                <h2 className="font-semibold text-gray-900 dark:text-white">Upcoming Events</h2>
                 <span className="text-xs text-gray-500">{events.length} total</span>
               </div>
 
               {events.length === 0 ? (
                 <div className="section-card py-16 flex flex-col items-center justify-center text-center">
-                  <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-3">
-                    <svg className="w-8 h-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div className="w-16 h-16 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center mb-3">
+                    <svg className="w-8 h-8 text-gray-400 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                   </div>
-                  <p className="text-gray-400 font-medium">No events scheduled</p>
-                  <p className="text-xs text-gray-600 mt-1">Schedule an event using the form</p>
+                  <p className="text-gray-600 dark:text-gray-400 font-medium">No events scheduled</p>
+                  <p className="text-xs text-gray-500 dark:text-gray-600 mt-1">Schedule an event using the form</p>
                 </div>
               ) : (
                 <div className="grid gap-3">
@@ -305,7 +305,7 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
             {/* Add Leader button */}
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="font-semibold text-white">Church Leaders</h2>
+                <h2 className="font-semibold text-gray-900 dark:text-white">Church Leaders</h2>
                 <p className="text-xs text-gray-500 mt-0.5">{leaders.length} leader{leaders.length !== 1 ? 's' : ''} registered</p>
               </div>
               <button
@@ -323,11 +323,11 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
             {/* Add Leader Form */}
             {showLeaderForm && (
               <form id="add-leader-form" onSubmit={handleAddLeader}
-                className="section-card border-red-600/20 space-y-3 animate-fade-in">
-                <h3 className="text-sm font-semibold text-red-400">New Leader Account</h3>
+                className="section-card border-red-300 dark:border-red-600/20 space-y-3 animate-fade-in">
+                <h3 className="text-sm font-semibold text-red-600 dark:text-red-400">New Leader Account</h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1">Full Name *</label>
+                    <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Full Name *</label>
                     <input
                       id="leader-name"
                       type="text"
@@ -339,7 +339,7 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
                     />
                   </div>
                   <div>
-                    <label className="block text-xs text-gray-400 mb-1">Email *</label>
+                    <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Email *</label>
                     <input
                       id="leader-email"
                       type="email"
@@ -351,7 +351,7 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
                     />
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="block text-xs text-gray-400 mb-1">Temporary Password *</label>
+                    <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Temporary Password *</label>
                     <input
                       id="leader-password"
                       type="password"
@@ -365,7 +365,7 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
                   </div>
                 </div>
                 {leaderError && (
-                  <p className="text-xs text-red-400 bg-red-900/20 border border-red-600/30 rounded px-3 py-2">{leaderError}</p>
+                  <p className="text-xs text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/20 border border-red-300 dark:border-red-600/30 rounded px-3 py-2">{leaderError}</p>
                 )}
                 <div className="flex gap-2">
                   <button id="save-leader-btn" type="submit" disabled={addingLeader} className="btn-red text-sm">
@@ -380,7 +380,7 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
 
             {/* Success message */}
             {leaderSuccess && (
-              <p className="text-sm text-green-400 bg-green-900/20 border border-green-600/30 rounded-lg px-4 py-3 flex items-center gap-2 animate-fade-in">
+              <p className="text-sm text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-600/30 rounded-lg px-4 py-3 flex items-center gap-2 animate-fade-in">
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                 </svg>
@@ -391,21 +391,21 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
             {/* Leaders Grid */}
             {leaders.length === 0 ? (
               <div className="section-card py-16 flex flex-col items-center justify-center text-center">
-                <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-3">
-                  <svg className="w-8 h-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="w-16 h-16 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center mb-3">
+                  <svg className="w-8 h-8 text-gray-400 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                       d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                   </svg>
                 </div>
-                <p className="text-gray-400 font-medium">No leaders yet</p>
-                <p className="text-xs text-gray-600 mt-1">Add your first leader above</p>
+                <p className="text-gray-600 dark:text-gray-400 font-medium">No leaders yet</p>
+                <p className="text-xs text-gray-500 dark:text-gray-600 mt-1">Add your first leader above</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                 {leaders.map((leader, i) => (
                   <div
                     key={leader.id}
-                    className="section-card animate-fade-in hover:border-white/15 transition-all group"
+                    className="section-card animate-fade-in hover:border-black/15 dark:hover:border-white/15 transition-all group"
                     style={{ animationDelay: `${i * 60}ms` }}
                   >
                     <div className="flex items-start gap-3">
@@ -415,9 +415,9 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
                       </div>
                       {/* Info */}
                       <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-white text-sm truncate">{leader.full_name}</p>
+                        <p className="font-semibold text-gray-900 dark:text-white text-sm truncate">{leader.full_name}</p>
                         <div className="flex items-center gap-2 mt-1">
-                          <span className="inline-flex items-center gap-1 text-xs bg-red-900/30 text-red-300 px-2 py-0.5 rounded-full border border-red-600/20">
+                          <span className="inline-flex items-center gap-1 text-xs bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-300 px-2 py-0.5 rounded-full border border-red-200 dark:border-red-600/20">
                             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                             </svg>

@@ -6,10 +6,22 @@
     --msdc-red-dark: #8B0000;
     --msdc-red-light: #E74C3C;
     --msdc-cream: #FFF8F8;
+    
+    /* Light Mode Variables (Default) */
+    --msdc-charcoal: #F9FAFB; /* Light background */
+    --msdc-charcoal-light: #FFFFFF; /* White cards */
+    --msdc-charcoal-mid: #F3F4F6; /* Gray border/hover */
+    --msdc-text-muted: #6B7280; /* Gray text */
+    --msdc-text-main: #111827;
+  }
+
+  .dark {
+    /* Dark Mode Variables */
     --msdc-charcoal: #1A1A1A;
     --msdc-charcoal-light: #2D2D2D;
     --msdc-charcoal-mid: #3A3A3A;
     --msdc-text-muted: #A0A0A0;
+    --msdc-text-main: #F5F5F5;
   }
 
   * {
@@ -22,7 +34,7 @@
 
   body {
     background-color: var(--msdc-charcoal);
-    color: #F5F5F5;
+    color: var(--msdc-text-main);
     font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
@@ -31,11 +43,16 @@
 @layer utilities {
   /* Glassmorphism card */
   .glass-card {
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(0, 0, 0, 0.03);
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.05);
     border-radius: 1rem;
+  }
+  
+  .dark .glass-card {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   /* Red gradient text */
@@ -81,12 +98,12 @@
   /* Ghost button */
   .btn-ghost {
     background: transparent;
-    color: #F5F5F5;
+    color: var(--msdc-text-main);
     font-weight: 500;
     padding: 0.625rem 1.5rem;
     border-radius: 0.5rem;
     transition: all 0.2s ease;
-    border: 1px solid rgba(255,255,255,0.15);
+    border: 1px solid rgba(0,0,0,0.15);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -94,6 +111,15 @@
   }
 
   .btn-ghost:hover {
+    background: rgba(0,0,0,0.05);
+    border-color: rgba(0,0,0,0.25);
+  }
+  
+  .dark .btn-ghost {
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  
+  .dark .btn-ghost:hover {
     background: rgba(255,255,255,0.08);
     border-color: rgba(255,255,255,0.3);
   }
@@ -119,32 +145,50 @@
   /* Input field */
   .input-field {
     width: 100%;
-    background: rgba(255, 255, 255, 0.07);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: #FFFFFF;
+    border: 1px solid rgba(0, 0, 0, 0.12);
     border-radius: 0.5rem;
     padding: 0.75rem 1rem;
-    color: #F5F5F5;
+    color: #111827;
     font-size: 0.95rem;
     transition: all 0.2s ease;
     outline: none;
   }
 
   .input-field::placeholder {
-    color: rgba(255,255,255,0.35);
+    color: rgba(0,0,0,0.35);
   }
 
   .input-field:focus {
     border-color: #E74C3C;
-    background: rgba(255,255,255,0.1);
+    background: #FFFFFF;
     box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.15);
+  }
+  
+  .dark .input-field {
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #F5F5F5;
+  }
+  
+  .dark .input-field::placeholder {
+    color: rgba(255,255,255,0.35);
+  }
+  
+  .dark .input-field:focus {
+    background: rgba(255,255,255,0.1);
   }
 
   /* Section card */
   .section-card {
     background: var(--msdc-charcoal-light);
-    border: 1px solid rgba(255,255,255,0.07);
+    border: 1px solid rgba(0,0,0,0.07);
     border-radius: 1rem;
     padding: 1.5rem;
+  }
+  
+  .dark .section-card {
+    border: 1px solid rgba(255,255,255,0.07);
   }
 
   /* Red accent bar */
@@ -184,6 +228,11 @@
   }
 
   .attendance-toggle.absent {
+    background: rgba(0,0,0,0.05);
+    border: 1px solid rgba(0,0,0,0.15);
+  }
+
+  .dark .attendance-toggle.absent {
     background: rgba(255,255,255,0.1);
     border: 1px solid rgba(255,255,255,0.2);
   }

@@ -46,11 +46,11 @@ export default function EventForm({ onEventAdded }: { onEventAdded: () => void }
 
   return (
     <form onSubmit={handleSubmit} className="section-card space-y-4">
-      <h3 className="font-semibold text-white mb-2">Schedule New Event</h3>
+      <h3 className="font-semibold text-gray-900 dark:text-white mb-2">Schedule New Event</h3>
       
       <div className="space-y-3">
         <div>
-          <label className="block text-xs text-gray-400 mb-1">Event Title *</label>
+          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Event Title *</label>
           <input
             type="text"
             value={title}
@@ -62,7 +62,7 @@ export default function EventForm({ onEventAdded }: { onEventAdded: () => void }
         </div>
         
         <div>
-          <label className="block text-xs text-gray-400 mb-1">Date *</label>
+          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Date *</label>
           <input
             type="date"
             value={eventDate}
@@ -73,7 +73,7 @@ export default function EventForm({ onEventAdded }: { onEventAdded: () => void }
         </div>
         
         <div>
-          <label className="block text-xs text-gray-400 mb-1">Description (Optional)</label>
+          <label className="block text-xs text-gray-600 dark:text-gray-400 mb-1">Description (Optional)</label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -83,7 +83,7 @@ export default function EventForm({ onEventAdded }: { onEventAdded: () => void }
         </div>
       </div>
       
-      {error && <p className="text-red-400 text-xs">{error}</p>}
+      {error && <p className="text-red-600 dark:text-red-400 text-xs">{error}</p>}
       
       <button 
         type="submit" 

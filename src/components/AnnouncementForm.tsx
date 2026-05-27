@@ -46,7 +46,7 @@ export default function AnnouncementForm({ userId, onCreated }: AnnouncementForm
     <form id="announcement-form" onSubmit={handleSubmit} className="space-y-3">
       {/* Title */}
       <div>
-        <label htmlFor="ann-title" className="block text-xs font-medium text-gray-400 mb-1">
+        <label htmlFor="ann-title" className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
           Announcement Title
         </label>
         <input
@@ -63,7 +63,7 @@ export default function AnnouncementForm({ userId, onCreated }: AnnouncementForm
 
       {/* Body */}
       <div>
-        <label htmlFor="ann-body" className="block text-xs font-medium text-gray-400 mb-1">
+        <label htmlFor="ann-body" className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1">
           Message
         </label>
         <textarea
@@ -79,14 +79,14 @@ export default function AnnouncementForm({ userId, onCreated }: AnnouncementForm
 
       {/* Error */}
       {error && (
-        <p className="text-sm text-red-400 bg-red-900/20 border border-red-600/30 rounded-lg px-3 py-2">
+        <p className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-600/30 rounded-lg px-3 py-2">
           {error}
         </p>
       )}
 
       {/* Success */}
       {success && (
-        <p className="text-sm text-green-400 bg-green-900/20 border border-green-600/30 rounded-lg px-3 py-2 flex items-center gap-2">
+        <p className="text-sm text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-600/30 rounded-lg px-3 py-2 flex items-center gap-2">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>

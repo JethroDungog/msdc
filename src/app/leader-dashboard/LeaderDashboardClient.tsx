@@ -82,7 +82,7 @@ export default function LeaderDashboardClient({
   ]
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--msdc-charcoal)' }}>
+    <div className="min-h-screen bg-msdc-charcoal-light dark:bg-msdc-charcoal">
       <Navbar userFullName={profile.full_name} userRole="leader" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
@@ -93,7 +93,7 @@ export default function LeaderDashboardClient({
             {profile.full_name.charAt(0).toUpperCase()}
           </div>
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
               Welcome, <span className="text-gradient-red">{profile.full_name}</span> 👋
             </h1>
             <p className="text-sm text-gray-500">Leader · My Soul Desire Church</p>
@@ -104,8 +104,8 @@ export default function LeaderDashboardClient({
         <section id="announcements-section">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-1 h-5 rounded-full bg-gradient-to-b from-red-500 to-red-800" />
-            <h2 className="text-base font-semibold text-white">Church Announcements</h2>
-            <span className="text-xs bg-white/10 text-gray-400 px-2 py-0.5 rounded-full">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white">Church Announcements</h2>
+            <span className="text-xs bg-black/5 dark:bg-white/10 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full">
               {announcements.length}
             </span>
           </div>
@@ -129,8 +129,8 @@ export default function LeaderDashboardClient({
         <section id="events-section">
           <div className="flex items-center gap-3 mb-3">
             <div className="w-1 h-5 rounded-full bg-gradient-to-b from-yellow-500 to-yellow-800" />
-            <h2 className="text-base font-semibold text-white">Upcoming Events</h2>
-            <span className="text-xs bg-white/10 text-gray-400 px-2 py-0.5 rounded-full">
+            <h2 className="text-base font-semibold text-gray-900 dark:text-white">Upcoming Events</h2>
+            <span className="text-xs bg-black/5 dark:bg-white/10 text-gray-500 dark:text-gray-400 px-2 py-0.5 rounded-full">
               {events.length}
             </span>
           </div>
@@ -153,7 +153,7 @@ export default function LeaderDashboardClient({
         {/* ── Main Feature Panel ─────────────────────────── */}
         <section id="main-panel">
           {/* Tab bar */}
-          <div className="flex items-center gap-1 bg-white/[0.04] border border-white/[0.07] rounded-xl p-1 mb-4 overflow-x-auto">
+          <div className="flex items-center gap-1 bg-black/[0.04] dark:bg-white/[0.04] border border-black/[0.07] dark:border-white/[0.07] rounded-xl p-1 mb-4 overflow-x-auto">
             {tabs.map((tab) => (
               <button
                 key={tab.key}
@@ -161,8 +161,8 @@ export default function LeaderDashboardClient({
                 onClick={() => setActiveTab(tab.key)}
                 className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all whitespace-nowrap flex-1 justify-center ${
                   activeTab === tab.key
-                    ? 'bg-gradient-to-r from-red-700 to-red-900 text-white shadow-lg shadow-red-900/30'
-                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                    ? 'bg-gradient-to-r from-red-500 to-red-700 dark:from-red-700 dark:to-red-900 text-white shadow-lg shadow-red-900/30'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
                 }`}
               >
                 {tab.icon}
@@ -198,7 +198,7 @@ export default function LeaderDashboardClient({
         {/* ── Stats quick view ───────────────────────────── */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 animate-fade-in">
           <div className="section-card text-center py-4">
-            <p className="text-3xl font-bold text-white">{members.length}</p>
+            <p className="text-3xl font-bold text-gray-900 dark:text-white">{members.length}</p>
             <p className="text-xs text-gray-500 mt-1">Total Members</p>
           </div>
           <div className="section-card text-center py-4">

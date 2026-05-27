@@ -104,14 +104,14 @@ export default function AttendanceHistory({ leaderId }: AttendanceHistoryProps) 
   if (sessions.length === 0) {
     return (
       <div className="section-card flex flex-col items-center justify-center py-12 text-center">
-        <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-3">
-          <svg className="w-8 h-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <div className="w-16 h-16 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center mb-3">
+          <svg className="w-8 h-8 text-gray-400 dark:text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
               d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
         </div>
-        <p className="text-gray-400 font-medium">No attendance history yet</p>
-        <p className="text-xs text-gray-600 mt-1">Save your first session above to see it here</p>
+        <p className="text-gray-600 dark:text-gray-400 font-medium">No attendance history yet</p>
+        <p className="text-xs text-gray-500 dark:text-gray-600 mt-1">Save your first session above to see it here</p>
       </div>
     )
   }
@@ -132,39 +132,39 @@ export default function AttendanceHistory({ leaderId }: AttendanceHistoryProps) 
                     ? setSelectedDate(null)
                     : loadSessionDetails(session.session_date, session.service_type)
                 }
-                className={`w-full section-card flex items-center gap-4 text-left transition-all hover:border-white/15 ${
-                  isSelected ? 'border-red-600/40 bg-red-900/10' : ''
+                className={`w-full section-card flex items-center gap-4 text-left transition-all hover:border-black/15 dark:hover:border-white/15 ${
+                  isSelected ? 'border-red-300 dark:border-red-600/40 bg-red-50 dark:bg-red-900/10' : ''
                 }`}
               >
                 {/* Date */}
                 <div className="shrink-0 text-center w-14">
-                  <p className="text-xl font-bold text-white leading-none">
+                  <p className="text-xl font-bold text-gray-900 dark:text-white leading-none">
                     {format(parseISO(session.session_date), 'd')}
                   </p>
                   <p className="text-xs text-gray-500 uppercase tracking-wide">
                     {format(parseISO(session.session_date), 'MMM')}
                   </p>
-                  <p className="text-xs text-gray-600">
+                  <p className="text-xs text-gray-400 dark:text-gray-600">
                     {format(parseISO(session.session_date), 'yyyy')}
                   </p>
                 </div>
 
                 {/* Divider */}
-                <div className="w-px h-10 bg-white/10 shrink-0" />
+                <div className="w-px h-10 bg-black/10 dark:bg-white/10 shrink-0" />
 
                 {/* Stats */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-white font-medium text-sm mb-1">{session.service_type}</p>
+                  <p className="text-gray-900 dark:text-white font-medium text-sm mb-1">{session.service_type}</p>
                   <div className="flex items-center justify-between mb-1.5">
-                    <p className="text-xs text-gray-300">
-                      <span className="text-white font-semibold">{session.present}</span>
+                    <p className="text-xs text-gray-600 dark:text-gray-300">
+                      <span className="text-gray-900 dark:text-white font-semibold">{session.present}</span>
                       <span className="text-gray-500"> / {session.total} present</span>
                     </p>
-                    <span className={`text-xs font-bold ${pct >= 80 ? 'text-green-400' : pct >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
+                    <span className={`text-xs font-bold ${pct >= 80 ? 'text-green-600 dark:text-green-400' : pct >= 50 ? 'text-yellow-600 dark:text-yellow-400' : 'text-red-600 dark:text-red-400'}`}>
                       {pct}%
                     </span>
                   </div>
-                  <div className="h-1.5 rounded-full bg-white/10 overflow-hidden">
+                  <div className="h-1.5 rounded-full bg-black/5 dark:bg-white/10 overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all duration-700"
                       style={{
@@ -177,7 +177,7 @@ export default function AttendanceHistory({ leaderId }: AttendanceHistoryProps) 
 
                 {/* Chevron */}
                 <svg
-                  className={`w-4 h-4 text-gray-600 shrink-0 transition-transform ${isSelected ? 'rotate-180' : ''}`}
+                  className={`w-4 h-4 text-gray-400 dark:text-gray-600 shrink-0 transition-transform ${isSelected ? 'rotate-180' : ''}`}
                   fill="none" viewBox="0 0 24 24" stroke="currentColor"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -186,8 +186,8 @@ export default function AttendanceHistory({ leaderId }: AttendanceHistoryProps) 
 
               {/* Expanded detail */}
               {isSelected && (
-                <div className="mt-1 section-card border-red-600/20 animate-fade-in">
-                  <p className="text-xs font-semibold text-red-400 mb-3 uppercase tracking-wide">
+                <div className="mt-1 section-card border-red-200 dark:border-red-600/20 animate-fade-in">
+                  <p className="text-xs font-semibold text-red-600 dark:text-red-400 mb-3 uppercase tracking-wide">
                     {format(parseISO(session.session_date), 'MMMM d, yyyy')} • {session.service_type}
                   </p>
                   {loadingDetails ? (
@@ -206,11 +206,11 @@ export default function AttendanceHistory({ leaderId }: AttendanceHistoryProps) 
                             key={rec.member_id}
                             className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${
                               rec.present
-                                ? 'bg-green-900/20 text-green-300'
-                                : 'bg-white/[0.03] text-gray-500'
+                                ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300'
+                                : 'bg-black/[0.03] dark:bg-white/[0.03] text-gray-600 dark:text-gray-500'
                             }`}
                           >
-                            <span className={`w-2 h-2 rounded-full shrink-0 ${rec.present ? 'bg-green-400' : 'bg-gray-600'}`} />
+                            <span className={`w-2 h-2 rounded-full shrink-0 ${rec.present ? 'bg-green-500 dark:bg-green-400' : 'bg-gray-300 dark:bg-gray-600'}`} />
                             <span className="truncate">{rec.members?.full_name ?? 'Unknown'}</span>
                             <span className="ml-auto text-xs shrink-0">
                               {rec.present ? '✓' : '✗'}

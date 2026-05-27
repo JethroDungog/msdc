@@ -108,7 +108,7 @@ export default function AttendanceTracker({ leaderId, members }: AttendanceTrack
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 justify-between">
         <div>
-          <h3 className="font-semibold text-white">Attendance Tracker</h3>
+          <h3 className="font-semibold text-gray-900 dark:text-white">Attendance Tracker</h3>
           <p className="text-xs text-gray-500 mt-0.5">{todayDisplay}</p>
         </div>
         
@@ -129,7 +129,7 @@ export default function AttendanceTracker({ leaderId, members }: AttendanceTrack
           
           {/* Date picker */}
           <div className="flex items-center gap-2">
-          <label className="text-xs text-gray-400">Session Date:</label>
+          <label className="text-xs text-gray-500 dark:text-gray-400">Session Date:</label>
           <input
             id="attendance-date"
             type="date"
@@ -146,15 +146,15 @@ export default function AttendanceTracker({ leaderId, members }: AttendanceTrack
       {totalCount > 0 && (
         <div className="section-card py-3 px-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-300">
-              <span className="text-white font-bold text-lg">{presentCount}</span>
+            <span className="text-sm text-gray-600 dark:text-gray-300">
+              <span className="text-gray-900 dark:text-white font-bold text-lg">{presentCount}</span>
               <span className="text-gray-500"> / {totalCount} present</span>
             </span>
             <span className={`text-sm font-bold ${percentage >= 80 ? 'text-green-400' : percentage >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
               {percentage}%
             </span>
           </div>
-          <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+          <div className="h-2 rounded-full bg-black/5 dark:bg-white/10 overflow-hidden">
             <div
               className="h-full rounded-full transition-all duration-500"
               style={{
@@ -189,7 +189,7 @@ export default function AttendanceTracker({ leaderId, members }: AttendanceTrack
       {/* Member toggles */}
       {members.length === 0 ? (
         <div className="section-card py-10 flex flex-col items-center justify-center text-center">
-          <p className="text-gray-400">Add members first to track attendance</p>
+          <p className="text-gray-500 dark:text-gray-400">Add members first to track attendance</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -202,8 +202,8 @@ export default function AttendanceTracker({ leaderId, members }: AttendanceTrack
                 onClick={() => toggle(member.id)}
                 className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl border transition-all duration-200 text-left animate-fade-in ${
                   isPresent
-                    ? 'bg-green-900/20 border-green-600/30 hover:border-green-500/50'
-                    : 'bg-white/[0.03] border-white/[0.08] hover:border-white/20'
+                    ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-600/30 hover:border-green-300 dark:hover:border-green-500/50'
+                    : 'bg-white dark:bg-white/[0.03] border-black/5 dark:border-white/[0.08] hover:border-black/15 dark:hover:border-white/20'
                 }`}
                 style={{ animationDelay: `${i * 40}ms` }}
                 aria-label={`${member.full_name} — ${isPresent ? 'Present' : 'Absent'}`}
@@ -212,17 +212,17 @@ export default function AttendanceTracker({ leaderId, members }: AttendanceTrack
                 <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all ${
                   isPresent
                     ? 'bg-gradient-to-br from-green-500 to-green-700 text-white'
-                    : 'bg-white/10 text-gray-400'
+                    : 'bg-black/5 dark:bg-white/10 text-gray-500 dark:text-gray-400'
                 }`}>
                   {member.full_name.charAt(0).toUpperCase()}
                 </div>
 
                 {/* Name */}
                 <div className="flex-1 min-w-0">
-                  <p className={`font-medium text-sm truncate transition-colors ${isPresent ? 'text-white' : 'text-gray-300'}`}>
+                  <p className={`font-medium text-sm truncate transition-colors ${isPresent ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300'}`}>
                     {member.full_name}
                   </p>
-                  <p className={`text-xs mt-0.5 transition-colors ${isPresent ? 'text-green-400' : 'text-gray-600'}`}>
+                  <p className={`text-xs mt-0.5 transition-colors ${isPresent ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-600'}`}>
                     {isPresent ? '✓ Present' : '— Absent'}
                   </p>
                 </div>
