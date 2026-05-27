@@ -7,7 +7,6 @@ interface Member {
   id: string
   full_name: string
   phone: string | null
-  email: string | null
   created_at: string
 }
 
@@ -23,7 +22,6 @@ export default function MemberList({ leaderId, members, onMembersChanged }: Memb
   const [showAddForm, setShowAddForm] = useState(false)
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
-  const [email, setEmail] = useState('')
   const [adding, setAdding] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -38,13 +36,12 @@ export default function MemberList({ leaderId, members, onMembersChanged }: Memb
       leader_id: leaderId,
       full_name: fullName.trim(),
       phone: phone.trim() || null,
-      email: email.trim() || null,
     })
 
     setAdding(false)
     if (err) { setError(err.message); return }
 
-    setFullName(''); setPhone(''); setEmail('')
+    setFullName(''); setPhone('')
     setShowAddForm(false)
     onMembersChanged()
   }
@@ -68,7 +65,6 @@ export default function MemberList({ leaderId, members, onMembersChanged }: Memb
       .update({
         full_name: editingMember.full_name.trim(),
         phone: editingMember.phone?.trim() || null,
-        email: editingMember.email?.trim() || null,
       })
       .eq('id', editingMember.id)
 
@@ -127,17 +123,6 @@ export default function MemberList({ leaderId, members, onMembersChanged }: Memb
                 className="input-field"
               />
             </div>
-            <div className="sm:col-span-2">
-              <label className="block text-xs text-gray-400 mb-1">Email</label>
-              <input
-                id="member-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="member@email.com"
-                className="input-field"
-              />
-            </div>
           </div>
           {error && <p className="text-xs text-red-400">{error}</p>}
           <div className="flex gap-2">
@@ -173,15 +158,6 @@ export default function MemberList({ leaderId, members, onMembersChanged }: Memb
                 type="tel"
                 value={editingMember.phone ?? ''}
                 onChange={(e) => setEditingMember({ ...editingMember, phone: e.target.value })}
-                className="input-field"
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <label className="block text-xs text-gray-400 mb-1">Email</label>
-              <input
-                type="email"
-                value={editingMember.email ?? ''}
-                onChange={(e) => setEditingMember({ ...editingMember, email: e.target.value })}
                 className="input-field"
               />
             </div>
@@ -229,9 +205,6 @@ export default function MemberList({ leaderId, members, onMembersChanged }: Memb
                 <div className="flex items-center gap-3 mt-0.5">
                   {member.phone && (
                     <span className="text-xs text-gray-500 truncate">{member.phone}</span>
-                  )}
-                  {member.email && (
-                    <span className="text-xs text-gray-600 truncate hidden sm:block">{member.email}</span>
                   )}
                 </div>
               </div>

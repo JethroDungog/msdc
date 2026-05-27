@@ -7,7 +7,8 @@ import AnnouncementCard from '@/components/AnnouncementCard'
 import MemberList from '@/components/MemberList'
 import AttendanceTracker from '@/components/AttendanceTracker'
 import AttendanceHistory from '@/components/AttendanceHistory'
-import type { Announcement, Member } from '@/lib/types'
+import EventCard from '@/components/EventCard'
+import type { Announcement, Member, ChurchEvent } from '@/lib/types'
 
 interface Profile {
   id: string
@@ -21,23 +22,26 @@ interface LeaderDashboardClientProps {
   profile: Profile
   initialAnnouncements: Announcement[]
   initialMembers: Member[]
+  initialEvents: ChurchEvent[]
 }
 
 export default function LeaderDashboardClient({
   profile,
   initialAnnouncements,
   initialMembers,
+  initialEvents,
 }: LeaderDashboardClientProps) {
   const supabase = createClient()
   const [announcements] = useState<Announcement[]>(initialAnnouncements)
   const [members, setMembers] = useState<Member[]>(initialMembers)
+  const [events] = useState<ChurchEvent[]>(initialEvents)
   const [activeTab, setActiveTab] = useState<Tab>('members')
   const [refreshKey, setRefreshKey] = useState(0)
 
   const refreshMembers = useCallback(async () => {
     const { data } = await supabase
       .from('members')
-      .select('id, full_name, phone, email, created_at')
+      .select('id, full_name, phone, created_at')
       .eq('leader_id', profile.id)
       .order('full_name', { ascending: true })
     if (data) setMembers(data as Member[])
@@ -115,6 +119,31 @@ export default function LeaderDashboardClient({
               {announcements.map((ann, i) => (
                 <div key={ann.id} style={{ animationDelay: `${i * 60}ms` }}>
                   <AnnouncementCard announcement={ann} isAdmin={false} />
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* ── Events Section ──────────────────────── */}
+        <section id="events-section">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-1 h-5 rounded-full bg-gradient-to-b from-yellow-500 to-yellow-800" />
+            <h2 className="text-base font-semibold text-white">Upcoming Events</h2>
+            <span className="text-xs bg-white/10 text-gray-400 px-2 py-0.5 rounded-full">
+              {events.length}
+            </span>
+          </div>
+
+          {events.length === 0 ? (
+            <div className="section-card py-8 text-center text-gray-500 text-sm">
+              No upcoming events scheduled.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {events.map((event, i) => (
+                <div key={event.id} style={{ animationDelay: `${i * 60}ms` }}>
+                  <EventCard event={event} isAdmin={false} />
                 </div>
               ))}
             </div>

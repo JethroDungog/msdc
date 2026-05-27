@@ -6,6 +6,9 @@ import Image from 'next/image'
 import Navbar from '@/components/Navbar'
 import AnnouncementCard from '@/components/AnnouncementCard'
 import AnnouncementForm from '@/components/AnnouncementForm'
+import EventCard from '@/components/EventCard'
+import EventForm from '@/components/EventForm'
+import type { ChurchEvent } from '@/lib/types'
 
 interface Profile { id: string; full_name: string; role: 'admin' }
 
@@ -18,18 +21,20 @@ interface Leader {
   id: string; full_name: string; role: string; created_at: string; memberCount: number
 }
 
-type AdminTab = 'announcements' | 'leaders'
+type AdminTab = 'announcements' | 'leaders' | 'events'
 
 interface Props {
   profile: Profile
   initialAnnouncements: Announcement[]
   initialLeaders: Leader[]
+  initialEvents: ChurchEvent[]
 }
 
-export default function AdminDashboardClient({ profile, initialAnnouncements, initialLeaders }: Props) {
+export default function AdminDashboardClient({ profile, initialAnnouncements, initialLeaders, initialEvents }: Props) {
   const supabase = createClient()
   const [announcements, setAnnouncements] = useState<Announcement[]>(initialAnnouncements)
   const [leaders, setLeaders] = useState<Leader[]>(initialLeaders)
+  const [events, setEvents] = useState<ChurchEvent[]>(initialEvents)
   const [activeTab, setActiveTab] = useState<AdminTab>('announcements')
 
   // Add Leader form
@@ -49,6 +54,14 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
     if (data) setAnnouncements(data as unknown as Announcement[])
   }, [])
 
+  const refreshEvents = useCallback(async () => {
+    const { data } = await supabase
+      .from('events')
+      .select('id, title, description, event_date, created_at, profiles!created_by(full_name)')
+      .order('event_date', { ascending: true })
+    if (data) setEvents(data as unknown as ChurchEvent[])
+  }, [])
+
   const refreshLeaders = useCallback(async () => {
     const [{ data: ls }, { data: mc }] = await Promise.all([
       supabase.from('profiles').select('id, full_name, role, created_at').eq('role', 'leader').order('full_name'),
@@ -62,6 +75,12 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
   async function handleDeleteAnnouncement(id: string) {
     await supabase.from('announcements').delete().eq('id', id)
     setAnnouncements((prev) => prev.filter((a) => a.id !== id))
+  }
+
+  async function handleDeleteEvent(id: string) {
+    if (!confirm('Delete this event?')) return
+    await supabase.from('events').delete().eq('id', id)
+    setEvents((prev) => prev.filter((e) => e.id !== id))
   }
 
   async function handleAddLeader(e: React.FormEvent) {
@@ -159,6 +178,10 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
               icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" /></svg>
             },
             {
+              key: 'events', label: 'Calendar', count: events.length,
+              icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            },
+            {
               key: 'leaders', label: 'Leaders', count: leaders.length,
               icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
             },
@@ -226,6 +249,51 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
                     />
                   </div>
                 ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ── EVENTS TAB ─────────────────────────── */}
+        {activeTab === 'events' && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-in">
+            {/* Create Form */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-20">
+                <EventForm onEventAdded={refreshEvents} />
+              </div>
+            </div>
+
+            {/* Events List */}
+            <div className="lg:col-span-2 space-y-3">
+              <div className="flex items-center gap-2">
+                <h2 className="font-semibold text-white">Upcoming Events</h2>
+                <span className="text-xs text-gray-500">{events.length} total</span>
+              </div>
+
+              {events.length === 0 ? (
+                <div className="section-card py-16 flex flex-col items-center justify-center text-center">
+                  <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mb-3">
+                    <svg className="w-8 h-8 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <p className="text-gray-400 font-medium">No events scheduled</p>
+                  <p className="text-xs text-gray-600 mt-1">Schedule an event using the form</p>
+                </div>
+              ) : (
+                <div className="grid gap-3">
+                  {events.map((event, i) => (
+                    <div key={event.id} style={{ animationDelay: `${i * 60}ms` }}>
+                      <EventCard
+                        event={event}
+                        isAdmin={true}
+                        onDelete={handleDeleteEvent}
+                      />
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </div>

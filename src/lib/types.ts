@@ -12,7 +12,6 @@ export interface Member {
   id: string
   full_name: string
   phone: string | null
-  email: string | null
   created_at: string
 }
 
@@ -26,4 +25,13 @@ export interface Profile {
 export interface Leader extends Profile {
   role: 'admin' | 'leader'
   memberCount: number
+}
+
+export interface ChurchEvent {
+  id: string
+  title: string
+  description: string | null
+  event_date: string
+  created_at: string
+  profiles?: { full_name: string } | null
 }

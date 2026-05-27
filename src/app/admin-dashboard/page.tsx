@@ -20,7 +20,7 @@ export default async function AdminDashboardPage() {
 
   if (!profile || profile.role !== 'admin') redirect('/leader-dashboard')
 
-  const [{ data: announcements }, { data: leaders }, { data: memberCounts }] = await Promise.all([
+  const [{ data: announcements }, { data: leaders }, { data: memberCounts }, { data: events }] = await Promise.all([
     supabase
       .from('announcements')
       .select('id, title, body, created_at, profiles(full_name)')
@@ -33,6 +33,10 @@ export default async function AdminDashboardPage() {
     supabase
       .from('members')
       .select('leader_id'),
+    supabase
+      .from('events')
+      .select('id, title, description, event_date, created_at, profiles!created_by(full_name)')
+      .order('event_date', { ascending: true }),
   ])
 
   // Build member count per leader
@@ -49,6 +53,7 @@ export default async function AdminDashboardPage() {
         ...l,
         memberCount: countMap[l.id] ?? 0,
       }))}
+      initialEvents={(events ?? []) as unknown as Parameters<typeof AdminDashboardClient>[0]['initialEvents']}
     />
   )
 }

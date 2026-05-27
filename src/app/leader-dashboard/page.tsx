@@ -24,7 +24,7 @@ export default async function LeaderDashboardPage() {
   if (!profile || profile.role !== 'leader') redirect('/admin-dashboard')
 
   // Fetch initial data
-  const [{ data: announcements }, { data: members }] = await Promise.all([
+  const [{ data: announcements }, { data: members }, { data: events }] = await Promise.all([
     supabase
       .from('announcements')
       .select('id, title, body, created_at, profiles(full_name)')
@@ -32,17 +32,21 @@ export default async function LeaderDashboardPage() {
       .limit(10),
     supabase
       .from('members')
-      .select('id, full_name, phone, email, created_at')
+      .select('id, full_name, phone, created_at')
       .eq('leader_id', user.id)
       .order('full_name', { ascending: true }),
+    supabase
+      .from('events')
+      .select('id, title, description, event_date, created_at, profiles!created_by(full_name)')
+      .order('event_date', { ascending: true }),
   ])
 
   return (
     <LeaderDashboardClient
       profile={{ id: profile.id, full_name: profile.full_name, role: 'leader' }}
-      initialAnnouncements={(announcements ?? []) as unknown as Announcement[]}
+      initialAnnouncements={(announcements ?? []) as unknown as Parameters<typeof LeaderDashboardClient>[0]['initialAnnouncements']}
       initialMembers={(members ?? []) as Member[]}
+      initialEvents={(events ?? []) as unknown as Parameters<typeof LeaderDashboardClient>[0]['initialEvents']}
     />
   )
 }
-

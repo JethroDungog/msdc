@@ -45,7 +45,6 @@ CREATE TABLE IF NOT EXISTS public.members (
   leader_id   UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   full_name   TEXT NOT NULL,
   phone       TEXT,
-  email       TEXT,
   created_at  TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
@@ -58,6 +57,19 @@ CREATE TABLE IF NOT EXISTS public.announcements (
   created_by  UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
   title       TEXT NOT NULL,
   body        TEXT NOT NULL,
+  created_at  TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+-- ============================================================
+-- TABLE: events
+-- Upcoming church events
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.events (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  created_by  UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+  title       TEXT NOT NULL,
+  description TEXT,
+  event_date  DATE NOT NULL,
   created_at  TIMESTAMPTZ DEFAULT NOW() NOT NULL
 );
 
@@ -84,6 +96,7 @@ CREATE TABLE IF NOT EXISTS public.attendance_records (
 ALTER TABLE public.profiles           ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.members            ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.announcements      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.events             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.attendance_records ENABLE ROW LEVEL SECURITY;
 
 -- Helper function: check if current user is admin
@@ -144,6 +157,23 @@ CREATE POLICY "announcements_update" ON public.announcements
 
 -- Only admins can delete announcements
 CREATE POLICY "announcements_delete" ON public.announcements
+  FOR DELETE USING (public.is_admin());
+
+-- ---- events ----
+-- All authenticated users can read events
+CREATE POLICY "events_select" ON public.events
+  FOR SELECT USING (auth.uid() IS NOT NULL);
+
+-- Only admins can create events
+CREATE POLICY "events_insert" ON public.events
+  FOR INSERT WITH CHECK (public.is_admin());
+
+-- Only admins can update events
+CREATE POLICY "events_update" ON public.events
+  FOR UPDATE USING (public.is_admin());
+
+-- Only admins can delete events
+CREATE POLICY "events_delete" ON public.events
   FOR DELETE USING (public.is_admin());
 
 -- ---- attendance_records ----
