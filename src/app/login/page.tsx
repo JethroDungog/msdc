@@ -83,8 +83,7 @@ export default function LoginPage() {
 
           {/* Welcome Text */}
           <div className="mb-6 text-center">
-            <h2 className="text-base font-bold text-zinc-100 tracking-wide uppercase">Ministry Portal</h2>
-            <p className="text-xs text-zinc-400 mt-1">Sign in to access your dashboard</p>
+            <p className="text-sm text-zinc-400">Sign in to access your dashboard</p>
           </div>
 
           {/* Error Alert */}
