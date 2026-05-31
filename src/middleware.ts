@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -32,7 +32,7 @@ export async function proxy(request: NextRequest) {
 
   // ── Public routes (no auth needed) ──────────────────────────
   const publicRoutes = ['/login', '/api/auth']
-  const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route))
+  const isPublicRoute = pathname === '/' || publicRoutes.some((route) => pathname.startsWith(route))
 
   // ── Unauthenticated: redirect to /login ─────────────────────
   if (!user && !isPublicRoute) {

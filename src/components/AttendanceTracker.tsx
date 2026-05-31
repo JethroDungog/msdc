@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { format } from 'date-fns'
+import type { Visitor } from '@/lib/types'
 
 interface Member {
   id: string
@@ -12,17 +13,23 @@ interface Member {
 interface AttendanceTrackerProps {
   leaderId: string
   members: Member[]
+  visitors: Visitor[]
 }
 
 type AttendanceMap = Record<string, boolean>
 
-export default function AttendanceTracker({ leaderId, members }: AttendanceTrackerProps) {
+export default function AttendanceTracker({ leaderId, members, visitors }: AttendanceTrackerProps) {
   const supabase = createClient()
   const today = format(new Date(), 'yyyy-MM-dd')
   const todayDisplay = format(new Date(), 'EEEE, MMMM d, yyyy')
 
+  const activeVisitors = visitors.filter((v) => v.status === 'visitor')
+
   const [attendance, setAttendance] = useState<AttendanceMap>(() =>
     Object.fromEntries(members.map((m) => [m.id, false]))
+  )
+  const [visitorAttendance, setVisitorAttendance] = useState<AttendanceMap>(() =>
+    Object.fromEntries(activeVisitors.map((v) => [v.id, false]))
   )
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
@@ -34,6 +41,11 @@ export default function AttendanceTracker({ leaderId, members }: AttendanceTrack
   useEffect(() => {
     setAttendance(Object.fromEntries(members.map((m) => [m.id, attendance[m.id] ?? false])))
   }, [members])
+
+  // Re-initialize when visitors change
+  useEffect(() => {
+    setVisitorAttendance(Object.fromEntries(activeVisitors.map((v) => [v.id, visitorAttendance[v.id] ?? false])))
+  }, [visitors])
 
   // Load existing attendance for the selected date and service type
   useEffect(() => {
@@ -54,7 +66,6 @@ export default function AttendanceTracker({ leaderId, members }: AttendanceTrack
       data.forEach((rec) => { loaded[rec.member_id] = rec.present })
       setAttendance(loaded)
     } else {
-      // Reset if no data for this date
       setAttendance(Object.fromEntries(members.map((m) => [m.id, false])))
     }
   }
@@ -64,37 +75,65 @@ export default function AttendanceTracker({ leaderId, members }: AttendanceTrack
     setAttendance((prev) => ({ ...prev, [memberId]: !prev[memberId] }))
   }
 
+  function toggleVisitor(visitorId: string) {
+    setSaved(false)
+    setVisitorAttendance((prev) => ({ ...prev, [visitorId]: !prev[visitorId] }))
+  }
+
   function markAll(present: boolean) {
     setSaved(false)
     setAttendance(Object.fromEntries(members.map((m) => [m.id, present])))
   }
 
   async function handleSave() {
-    if (members.length === 0) return
+    if (members.length === 0 && activeVisitors.length === 0) return
     setSaving(true)
     setError(null)
     setSaved(false)
 
-    // Upsert all attendance records for today
-    const records = members.map((m) => ({
-      member_id: m.id,
-      leader_id: leaderId,
-      session_date: sessionDate,
-      service_type: serviceType,
-      present: attendance[m.id] ?? false,
-    }))
+    // Upsert member attendance records
+    if (members.length > 0) {
+      const memberRecords = members.map((m) => ({
+        member_id: m.id,
+        leader_id: leaderId,
+        session_date: sessionDate,
+        service_type: serviceType,
+        present: attendance[m.id] ?? false,
+      }))
 
-    const { error: upsertError } = await supabase
-      .from('attendance_records')
-      .upsert(records, { onConflict: 'member_id,session_date,service_type' })
+      const { error: upsertError } = await supabase
+        .from('attendance_records')
+        .upsert(memberRecords, { onConflict: 'member_id,session_date,service_type' })
 
-    setSaving(false)
-
-    if (upsertError) {
-      setError(upsertError.message)
-      return
+      if (upsertError) {
+        setError(upsertError.message)
+        setSaving(false)
+        return
+      }
     }
 
+    // Upsert visitor attendance records
+    if (activeVisitors.length > 0) {
+      const visitorRecords = activeVisitors.map((v) => ({
+        visitor_id: v.id,
+        leader_id: leaderId,
+        session_date: sessionDate,
+        service_type: serviceType,
+        present: visitorAttendance[v.id] ?? false,
+      }))
+
+      const { error: visitorErr } = await supabase
+        .from('visitor_attendance_records')
+        .upsert(visitorRecords, { onConflict: 'visitor_id,session_date,service_type' })
+
+      if (visitorErr) {
+        setError(visitorErr.message)
+        setSaving(false)
+        return
+      }
+    }
+
+    setSaving(false)
     setSaved(true)
     setTimeout(() => setSaved(false), 4000)
   }
@@ -102,6 +141,10 @@ export default function AttendanceTracker({ leaderId, members }: AttendanceTrack
   const presentCount = Object.values(attendance).filter(Boolean).length
   const totalCount = members.length
   const percentage = totalCount > 0 ? Math.round((presentCount / totalCount) * 100) : 0
+
+  const visitorPresentCount = Object.values(visitorAttendance).filter(Boolean).length
+
+  const canSave = members.length > 0 || activeVisitors.length > 0
 
   return (
     <div className="space-y-4">
@@ -124,6 +167,7 @@ export default function AttendanceTracker({ leaderId, members }: AttendanceTrack
               <option value="Sunday Service" className="bg-gray-900 text-white">Sunday Service</option>
               <option value="Midweek Service" className="bg-gray-900 text-white">Midweek Service</option>
               <option value="Dawnprayer Service" className="bg-gray-900 text-white">Dawnprayer Service</option>
+              <option value="LG Meeting" className="bg-gray-900 text-white">LG Meeting</option>
             </select>
           </div>
           
@@ -142,13 +186,13 @@ export default function AttendanceTracker({ leaderId, members }: AttendanceTrack
       </div>
     </div>
 
-      {/* Stats bar */}
+      {/* Stats bar — Members */}
       {totalCount > 0 && (
         <div className="section-card py-3 px-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm text-gray-600 dark:text-gray-300">
               <span className="text-gray-900 dark:text-white font-bold text-lg">{presentCount}</span>
-              <span className="text-gray-500"> / {totalCount} present</span>
+              <span className="text-gray-500"> / {totalCount} members present</span>
             </span>
             <span className={`text-sm font-bold ${percentage >= 80 ? 'text-green-400' : percentage >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
               {percentage}%
@@ -188,7 +232,7 @@ export default function AttendanceTracker({ leaderId, members }: AttendanceTrack
 
       {/* Member toggles */}
       {members.length === 0 ? (
-        <div className="section-card py-10 flex flex-col items-center justify-center text-center">
+        <div className="section-card py-8 flex flex-col items-center justify-center text-center">
           <p className="text-gray-500 dark:text-gray-400">Add members first to track attendance</p>
         </div>
       ) : (
@@ -235,6 +279,83 @@ export default function AttendanceTracker({ leaderId, members }: AttendanceTrack
         </div>
       )}
 
+      {/* ── Newcomers / Visitors Section ─────────────────────── */}
+      <div className="pt-4 mt-2 border-t border-black/[0.06] dark:border-white/[0.06]">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-1 h-5 rounded-full bg-gradient-to-b from-amber-400 to-amber-600" />
+          <h4 className="font-semibold text-gray-900 dark:text-white text-sm">Newcomers / Visitors</h4>
+          {activeVisitors.length > 0 && (
+            <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full">
+              {visitorPresentCount} / {activeVisitors.length} present
+            </span>
+          )}
+        </div>
+
+        {activeVisitors.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-6 text-center rounded-xl
+            bg-amber-50 dark:bg-amber-900/10 border border-dashed border-amber-200 dark:border-amber-800/40">
+            <svg className="w-8 h-8 text-amber-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+            <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">No visitors added yet</p>
+            <p className="text-xs text-gray-400 dark:text-gray-600 mt-1">
+              Add visitors in the "My Members" tab first
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {activeVisitors.map((visitor, i) => {
+              const isPresent = visitorAttendance[visitor.id] ?? false
+              return (
+                <button
+                  key={visitor.id}
+                  id={`toggle-visitor-${visitor.id}`}
+                  onClick={() => toggleVisitor(visitor.id)}
+                  className={`w-full flex items-center gap-4 px-4 py-3.5 rounded-xl border transition-all duration-200 text-left animate-fade-in ${
+                    isPresent
+                      ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-600/30 hover:border-amber-300 dark:hover:border-amber-500/50'
+                      : 'bg-white dark:bg-white/[0.03] border-black/5 dark:border-white/[0.08] hover:border-black/15 dark:hover:border-white/20'
+                  }`}
+                  style={{ animationDelay: `${i * 40}ms` }}
+                  aria-label={`${visitor.full_name} — ${isPresent ? 'Present' : 'Absent'}`}
+                >
+                  {/* Avatar */}
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-all ${
+                    isPresent
+                      ? 'bg-gradient-to-br from-amber-400 to-amber-600 text-white'
+                      : 'bg-black/5 dark:bg-white/10 text-gray-500 dark:text-gray-400'
+                  }`}>
+                    {visitor.full_name.charAt(0).toUpperCase()}
+                  </div>
+
+                  {/* Name + visitor badge */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className={`font-medium text-sm truncate transition-colors ${isPresent ? 'text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300'}`}>
+                        {visitor.full_name}
+                      </p>
+                      <span className="text-xs px-1.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 shrink-0">
+                        Visitor
+                      </span>
+                    </div>
+                    <p className={`text-xs mt-0.5 transition-colors ${isPresent ? 'text-amber-600 dark:text-amber-400' : 'text-gray-400 dark:text-gray-600'}`}>
+                      {isPresent ? '✓ Present' : '— Absent'}
+                    </p>
+                  </div>
+
+                  {/* Toggle switch — amber when present */}
+                  <div
+                    className={`attendance-toggle shrink-0 ${isPresent ? 'present' : 'absent'}`}
+                    style={isPresent ? { background: 'linear-gradient(135deg, #F59E0B, #D97706)', boxShadow: '0 0 12px rgba(245,158,11,0.4)' } : {}}
+                  />
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
       {/* Error */}
       {error && (
         <p className="text-sm text-red-400 bg-red-900/20 border border-red-600/30 rounded-lg px-3 py-2">
@@ -243,7 +364,7 @@ export default function AttendanceTracker({ leaderId, members }: AttendanceTrack
       )}
 
       {/* Save Button */}
-      {members.length > 0 && (
+      {canSave && (
         <button
           id="save-attendance-btn"
           onClick={handleSave}

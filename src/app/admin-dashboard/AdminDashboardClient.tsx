@@ -8,6 +8,7 @@ import AnnouncementCard from '@/components/AnnouncementCard'
 import AnnouncementForm from '@/components/AnnouncementForm'
 import EventCard from '@/components/EventCard'
 import EventForm from '@/components/EventForm'
+import AdminLeaderDetailView from '@/components/AdminLeaderDetailView'
 import type { ChurchEvent } from '@/lib/types'
 
 interface Profile { id: string; full_name: string; role: 'admin' }
@@ -18,7 +19,7 @@ interface Announcement {
 }
 
 interface Leader {
-  id: string; full_name: string; role: string; created_at: string; memberCount: number
+  id: string; full_name: string; role: string; created_at: string; memberCount: number; visitorCount: number
 }
 
 type AdminTab = 'announcements' | 'leaders' | 'events'
@@ -36,6 +37,7 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
   const [leaders, setLeaders] = useState<Leader[]>(initialLeaders)
   const [events, setEvents] = useState<ChurchEvent[]>(initialEvents)
   const [activeTab, setActiveTab] = useState<AdminTab>('announcements')
+  const [selectedLeader, setSelectedLeader] = useState<Leader | null>(null)
 
   // Add Leader form
   const [showLeaderForm, setShowLeaderForm] = useState(false)
@@ -63,13 +65,23 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
   }, [])
 
   const refreshLeaders = useCallback(async () => {
-    const [{ data: ls }, { data: mc }] = await Promise.all([
+    const [{ data: ls }, { data: mc }, { data: vc }] = await Promise.all([
       supabase.from('profiles').select('id, full_name, role, created_at').eq('role', 'leader').order('full_name'),
       supabase.from('members').select('leader_id'),
+      supabase.from('visitors').select('leader_id').eq('status', 'visitor')
     ])
+    
     const countMap: Record<string, number> = {}
     mc?.forEach((m) => { countMap[m.leader_id] = (countMap[m.leader_id] ?? 0) + 1 })
-    if (ls) setLeaders(ls.map((l) => ({ ...l, memberCount: countMap[l.id] ?? 0 })))
+    
+    const visitorCountMap: Record<string, number> = {}
+    vc?.forEach((v) => { visitorCountMap[v.leader_id] = (visitorCountMap[v.leader_id] ?? 0) + 1 })
+
+    if (ls) setLeaders(ls.map((l) => ({ 
+      ...l, 
+      memberCount: countMap[l.id] ?? 0,
+      visitorCount: visitorCountMap[l.id] ?? 0
+    })))
   }, [])
 
   async function handleDeleteAnnouncement(id: string) {
@@ -189,7 +201,10 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
             <button
               key={tab.key}
               id={`admin-tab-${tab.key}`}
-              onClick={() => setActiveTab(tab.key)}
+              onClick={() => {
+                setActiveTab(tab.key);
+                if (tab.key !== 'leaders') setSelectedLeader(null);
+              }}
               className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all flex-1 justify-center ${
                 activeTab === tab.key
                   ? 'bg-gradient-to-r from-red-500 to-red-700 dark:from-red-700 dark:to-red-900 text-white shadow-lg shadow-red-900/30'
@@ -301,8 +316,11 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
 
         {/* ── LEADERS TAB ───────────────────────────────── */}
         {activeTab === 'leaders' && (
-          <div className="animate-fade-in space-y-4">
-            {/* Add Leader button */}
+          selectedLeader ? (
+            <AdminLeaderDetailView leader={selectedLeader} onClose={() => setSelectedLeader(null)} />
+          ) : (
+            <div className="animate-fade-in space-y-4">
+              {/* Add Leader button */}
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="font-semibold text-gray-900 dark:text-white">Church Leaders</h2>
@@ -405,7 +423,8 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
                 {leaders.map((leader, i) => (
                   <div
                     key={leader.id}
-                    className="section-card animate-fade-in hover:border-black/15 dark:hover:border-white/15 transition-all group"
+                    onClick={() => setSelectedLeader(leader)}
+                    className="section-card animate-fade-in hover:border-black/15 dark:hover:border-white/15 transition-all group cursor-pointer"
                     style={{ animationDelay: `${i * 60}ms` }}
                   >
                     <div className="flex items-start gap-3">
@@ -430,26 +449,30 @@ export default function AdminDashboardClient({ profile, initialAnnouncements, in
                               d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                           </svg>
                           {leader.memberCount} member{leader.memberCount !== 1 ? 's' : ''}
+                          <span className="mx-1 opacity-50">•</span>
+                          <span className={(leader.visitorCount ?? 0) > 0 ? "text-amber-600 dark:text-amber-400" : ""}>
+                            {leader.visitorCount ?? 0} visitor{(leader.visitorCount ?? 0) !== 1 ? 's' : ''}
+                          </span>
                         </p>
                       </div>
+                      {/* Remove Action */}
+                      <button
+                        id={`remove-leader-${leader.id}`}
+                        onClick={(e) => { e.stopPropagation(); handleRemoveLeader(leader.id, leader.full_name); }}
+                        className="p-1.5 -mr-1 -mt-1 rounded-lg text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-all shrink-0"
+                        title="Remove Leader"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
                     </div>
-                    {/* Remove button */}
-                    <button
-                      id={`remove-leader-${leader.id}`}
-                      onClick={() => handleRemoveLeader(leader.id, leader.full_name)}
-                      className="btn-danger w-full mt-3 justify-center opacity-0 group-hover:opacity-100 transition-all text-xs"
-                    >
-                      <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                          d="M13 7a4 4 0 11-8 0 4 4 0 018 0zM9 14a6 6 0 00-6 6v1h12v-1a6 6 0 00-6-6zM21 12h-6" />
-                      </svg>
-                      Remove Leader
-                    </button>
                   </div>
                 ))}
               </div>
             )}
           </div>
+          )
         )}
       </div>
     </div>

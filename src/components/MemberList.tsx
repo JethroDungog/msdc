@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import VisitorList from '@/components/VisitorList'
+import type { Visitor } from '@/lib/types'
 
 interface Member {
   id: string
@@ -13,10 +15,13 @@ interface Member {
 interface MemberListProps {
   leaderId: string
   members: Member[]
+  visitors: Visitor[]
   onMembersChanged: () => void
+  onVisitorsChanged: () => void
+  isReadOnly?: boolean
 }
 
-export default function MemberList({ leaderId, members, onMembersChanged }: MemberListProps) {
+export default function MemberList({ leaderId, members, visitors, onMembersChanged, onVisitorsChanged, isReadOnly = false }: MemberListProps) {
   const supabase = createClient()
 
   const [showAddForm, setShowAddForm] = useState(false)
@@ -80,18 +85,25 @@ export default function MemberList({ leaderId, members, onMembersChanged }: Memb
       <div className="flex items-center justify-between">
         <div>
           <h3 className="font-semibold text-gray-900 dark:text-white">My Members</h3>
-          <p className="text-xs text-gray-500 mt-0.5">{members.length} member{members.length !== 1 ? 's' : ''} assigned</p>
+          <p className="text-xs text-gray-500 mt-0.5">
+            {members.length} member{members.length !== 1 ? 's' : ''}
+            {visitors.filter(v => v.status === 'visitor').length > 0 && (
+              <> · <span className="text-amber-600 dark:text-amber-400">{visitors.filter(v => v.status === 'visitor').length} visitor{visitors.filter(v => v.status === 'visitor').length !== 1 ? 's' : ''}</span></>
+            )}
+          </p>
         </div>
-        <button
-          id="add-member-btn"
-          onClick={() => { setShowAddForm(!showAddForm); setError(null) }}
-          className="btn-red text-sm px-3 py-2"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Add Member
-        </button>
+        {!isReadOnly && (
+          <button
+            id="add-member-btn"
+            onClick={() => { setShowAddForm(!showAddForm); setError(null) }}
+            className="btn-red text-sm px-3 py-2"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Add Member
+          </button>
+        )}
       </div>
 
       {/* Add Member Form */}
@@ -210,42 +222,53 @@ export default function MemberList({ leaderId, members, onMembersChanged }: Memb
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-1 shrink-0">
-                <button
-                  id={`edit-member-${member.id}`}
-                  onClick={() => { setEditingMember(member); setShowAddForm(false) }}
-                  className="p-1.5 rounded-lg text-gray-500 hover:text-yellow-400 hover:bg-yellow-400/10 transition-all"
-                  title="Edit member"
-                >
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
-                </button>
-                <button
-                  id={`delete-member-${member.id}`}
-                  onClick={() => handleDelete(member.id)}
-                  disabled={deletingId === member.id}
-                  className="p-1.5 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-400/10 transition-all"
-                  title="Remove member"
-                >
-                  {deletingId === member.id ? (
-                    <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
-                  ) : (
+              {!isReadOnly && (
+                <div className="flex items-center gap-1 shrink-0">
+                  <button
+                    id={`edit-member-${member.id}`}
+                    onClick={() => { setEditingMember(member); setShowAddForm(false) }}
+                    className="p-1.5 rounded-lg text-gray-500 hover:text-yellow-400 hover:bg-yellow-400/10 transition-all"
+                    title="Edit member"
+                  >
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
-                  )}
-                </button>
-              </div>
+                  </button>
+                  <button
+                    id={`delete-member-${member.id}`}
+                    onClick={() => handleDelete(member.id)}
+                    disabled={deletingId === member.id}
+                    className="p-1.5 rounded-lg text-gray-500 hover:text-red-400 hover:bg-red-400/10 transition-all"
+                    title="Remove member"
+                  >
+                    {deletingId === member.id ? (
+                      <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           ))}
         </div>
       )}
+
+      {/* Visitor List */}
+      <VisitorList
+        leaderId={leaderId}
+        visitors={visitors}
+        onVisitorsChanged={onVisitorsChanged}
+        onMembersChanged={onMembersChanged}
+        isReadOnly={isReadOnly}
+      />
     </div>
   )
 }

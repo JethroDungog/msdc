@@ -20,7 +20,7 @@ export default async function AdminDashboardPage() {
 
   if (!profile || profile.role !== 'admin') redirect('/leader-dashboard')
 
-  const [{ data: announcements }, { data: leaders }, { data: memberCounts }, { data: events }] = await Promise.all([
+  const [{ data: announcements }, { data: leaders }, { data: memberCounts }, { data: events }, { data: visitorCounts }] = await Promise.all([
     supabase
       .from('announcements')
       .select('id, title, body, created_at, profiles(full_name)')
@@ -37,12 +37,22 @@ export default async function AdminDashboardPage() {
       .from('events')
       .select('id, title, description, event_date, created_at, profiles!created_by(full_name)')
       .order('event_date', { ascending: true }),
+    supabase
+      .from('visitors')
+      .select('leader_id')
+      .eq('status', 'visitor'),
   ])
 
   // Build member count per leader
   const countMap: Record<string, number> = {}
   memberCounts?.forEach((m) => {
     countMap[m.leader_id] = (countMap[m.leader_id] ?? 0) + 1
+  })
+
+  // Build visitor count per leader
+  const visitorCountMap: Record<string, number> = {}
+  visitorCounts?.forEach((v) => {
+    visitorCountMap[v.leader_id] = (visitorCountMap[v.leader_id] ?? 0) + 1
   })
 
   return (
@@ -52,6 +62,7 @@ export default async function AdminDashboardPage() {
       initialLeaders={(leaders ?? []).map((l) => ({
         ...l,
         memberCount: countMap[l.id] ?? 0,
+        visitorCount: visitorCountMap[l.id] ?? 0,
       }))}
       initialEvents={(events ?? []) as unknown as Parameters<typeof AdminDashboardClient>[0]['initialEvents']}
     />

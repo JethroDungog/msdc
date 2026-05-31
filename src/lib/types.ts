@@ -35,3 +35,13 @@ export interface ChurchEvent {
   created_at: string
   profiles?: { full_name: string } | null
 }
+
+export interface Visitor {
+  id: string
+  full_name: string
+  phone: string | null
+  visit_date: string
+  notes: string | null
+  status: 'visitor' | 'converted'
+  created_at: string
+}

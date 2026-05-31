@@ -8,7 +8,7 @@ import MemberList from '@/components/MemberList'
 import AttendanceTracker from '@/components/AttendanceTracker'
 import AttendanceHistory from '@/components/AttendanceHistory'
 import EventCard from '@/components/EventCard'
-import type { Announcement, Member, ChurchEvent } from '@/lib/types'
+import type { Announcement, Member, ChurchEvent, Visitor } from '@/lib/types'
 
 interface Profile {
   id: string
@@ -23,6 +23,7 @@ interface LeaderDashboardClientProps {
   initialAnnouncements: Announcement[]
   initialMembers: Member[]
   initialEvents: ChurchEvent[]
+  initialVisitors: Visitor[]
 }
 
 export default function LeaderDashboardClient({
@@ -30,11 +31,13 @@ export default function LeaderDashboardClient({
   initialAnnouncements,
   initialMembers,
   initialEvents,
+  initialVisitors,
 }: LeaderDashboardClientProps) {
   const supabase = createClient()
   const [announcements] = useState<Announcement[]>(initialAnnouncements)
   const [members, setMembers] = useState<Member[]>(initialMembers)
   const [events] = useState<ChurchEvent[]>(initialEvents)
+  const [visitors, setVisitors] = useState<Visitor[]>(initialVisitors)
   const [activeTab, setActiveTab] = useState<Tab>('members')
   const [refreshKey, setRefreshKey] = useState(0)
 
@@ -46,6 +49,15 @@ export default function LeaderDashboardClient({
       .order('full_name', { ascending: true })
     if (data) setMembers(data as Member[])
     setRefreshKey((k) => k + 1)
+  }, [profile.id])
+
+  const refreshVisitors = useCallback(async () => {
+    const { data } = await supabase
+      .from('visitors')
+      .select('id, full_name, phone, visit_date, notes, status, created_at')
+      .eq('leader_id', profile.id)
+      .order('visit_date', { ascending: false })
+    if (data) setVisitors(data as Visitor[])
   }, [profile.id])
 
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
@@ -177,7 +189,9 @@ export default function LeaderDashboardClient({
               <MemberList
                 leaderId={profile.id}
                 members={members}
+                visitors={visitors}
                 onMembersChanged={refreshMembers}
+                onVisitorsChanged={refreshVisitors}
               />
             )}
 
@@ -186,26 +200,33 @@ export default function LeaderDashboardClient({
                 key={`tracker-${refreshKey}`}
                 leaderId={profile.id}
                 members={members}
+                visitors={visitors}
               />
             )}
 
             {activeTab === 'history' && (
-              <AttendanceHistory leaderId={profile.id} />
+              <AttendanceHistory leaderId={profile.id} visitors={visitors} />
             )}
           </div>
         </section>
 
         {/* ── Stats quick view ───────────────────────────── */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 animate-fade-in">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 animate-fade-in">
           <div className="section-card text-center py-4">
             <p className="text-3xl font-bold text-gray-900 dark:text-white">{members.length}</p>
             <p className="text-xs text-gray-500 mt-1">Total Members</p>
           </div>
           <div className="section-card text-center py-4">
+            <p className="text-3xl font-bold text-amber-500 dark:text-amber-400">
+              {visitors.filter(v => v.status === 'visitor').length}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">Total Visitors</p>
+          </div>
+          <div className="section-card text-center py-4">
             <p className="text-3xl font-bold text-red-600 dark:text-red-400">{announcements.length}</p>
             <p className="text-xs text-gray-500 mt-1">Announcements</p>
           </div>
-          <div className="section-card text-center py-4 col-span-2 sm:col-span-1">
+          <div className="section-card text-center py-4">
             <p className="text-3xl font-bold text-green-600 dark:text-green-400">
               {new Date().toLocaleDateString('en-PH', { weekday: 'short' })}
             </p>

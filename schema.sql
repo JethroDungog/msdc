@@ -201,3 +201,62 @@ CREATE POLICY "attendance_delete" ON public.attendance_records
 -- ============================================================
 -- After creating your admin user in Supabase Auth, run:
 -- UPDATE public.profiles SET role = 'admin' WHERE id = '<your-admin-user-uuid>';
+
+-- ============================================================
+-- TABLE: visitors
+-- People who visited a service but are not yet full members
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.visitors (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  leader_id   UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  full_name   TEXT NOT NULL,
+  phone       TEXT,
+  visit_date  DATE NOT NULL DEFAULT CURRENT_DATE,
+  notes       TEXT,
+  status      TEXT NOT NULL DEFAULT 'visitor' CHECK (status IN ('visitor', 'converted')),
+  created_at  TIMESTAMPTZ DEFAULT NOW() NOT NULL
+);
+
+ALTER TABLE public.visitors ENABLE ROW LEVEL SECURITY;
+
+-- Leaders see only their own visitors; admins see all
+CREATE POLICY "visitors_select" ON public.visitors
+  FOR SELECT USING (leader_id = auth.uid() OR public.is_admin());
+
+-- Leaders can add visitors (auto-assigned to themselves); admins can add any
+CREATE POLICY "visitors_insert" ON public.visitors
+  FOR INSERT WITH CHECK (leader_id = auth.uid() OR public.is_admin());
+
+-- Leaders can update only their own visitors; admins can update all
+CREATE POLICY "visitors_update" ON public.visitors
+  FOR UPDATE USING (leader_id = auth.uid() OR public.is_admin());
+
+-- Leaders can delete only their own visitors; admins can delete all
+CREATE POLICY "visitors_delete" ON public.visitors
+  FOR DELETE USING (leader_id = auth.uid() OR public.is_admin());
+
+-- ============================================================
+-- Visitor Attendance Records
+-- Tracks attendance specifically for visitors
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.visitor_attendance_records (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  visitor_id    UUID NOT NULL REFERENCES public.visitors(id) ON DELETE CASCADE,
+  leader_id     UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  session_date  DATE NOT NULL DEFAULT CURRENT_DATE,
+  service_type  TEXT NOT NULL DEFAULT 'Sunday Service',
+  present       BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at    TIMESTAMPTZ DEFAULT NOW() NOT NULL,
+  UNIQUE(visitor_id, session_date, service_type)
+);
+
+ALTER TABLE public.visitor_attendance_records ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "visitor_attendance_select" ON public.visitor_attendance_records
+  FOR SELECT USING (leader_id = auth.uid() OR public.is_admin());
+CREATE POLICY "visitor_attendance_insert" ON public.visitor_attendance_records
+  FOR INSERT WITH CHECK (leader_id = auth.uid() OR public.is_admin());
+CREATE POLICY "visitor_attendance_update" ON public.visitor_attendance_records
+  FOR UPDATE USING (leader_id = auth.uid() OR public.is_admin());
+CREATE POLICY "visitor_attendance_delete" ON public.visitor_attendance_records
+  FOR DELETE USING (leader_id = auth.uid() OR public.is_admin());
